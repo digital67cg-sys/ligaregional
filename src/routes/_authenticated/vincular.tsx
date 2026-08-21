@@ -162,8 +162,14 @@ function Vincular() {
               </div>
               <Button
                 onClick={() => {
-                  if (kind === "club_manager" && !teamId) return toast.error("Selecione o clube");
-                  if (kind === "athlete" && !playerId) return toast.error("Selecione o atleta");
+                  if (kind === "club_manager" && !teamId) {
+                    toast.error("Selecione o clube");
+                    return;
+                  }
+                  if (kind === "athlete" && !playerId) {
+                    toast.error("Selecione o atleta");
+                    return;
+                  }
                   request.mutate();
                 }}
                 disabled={request.isPending}
