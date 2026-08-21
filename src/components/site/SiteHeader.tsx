@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu, X, Trophy, LogIn, LayoutDashboard } from "lucide-react";
 import { useSeason } from "@/context/season";
 import { useSession } from "@/hooks/useAuth";
+import { useAccess } from "@/hooks/useAccess";
 import { SEASON_STATUS } from "@/lib/league";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { seasons, season, setSeasonId } = useSeason();
   const { user } = useSession();
+  const access = useAccess();
   const navigate = useNavigate();
 
   return (
@@ -71,8 +73,10 @@ export function SiteHeader() {
             </select>
           )}
           {user ? (
-            <Button size="sm" onClick={() => navigate({ to: "/painel" })}>
-              <LayoutDashboard className="mr-1.5 h-4 w-4" /> Painel
+            <Button size="sm" onClick={() => navigate({ to: access.panelPath })}>
+              <LayoutDashboard className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">{access.panelLabel}</span>
+              <span className="sm:hidden">Painel</span>
             </Button>
           ) : (
             <Button size="sm" variant="secondary" onClick={() => navigate({ to: "/auth" })}>
