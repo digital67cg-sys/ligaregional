@@ -7,11 +7,11 @@ export function TeamCrest({
   size = "md",
   className,
 }: {
-  name?: string;
-  short?: string;
-  crest?: string | null;
-  size?: "sm" | "md" | "lg" | "xl";
-  className?: string;
+  name?: string | undefined;
+  short?: string | undefined;
+  crest?: string | null | undefined;
+  size?: "sm" | "md" | "lg" | "xl" | undefined;
+  className?: string | undefined;
 }) {
   const sizes = {
     sm: "h-7 w-7 text-[10px]",
