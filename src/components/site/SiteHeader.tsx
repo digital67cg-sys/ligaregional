@@ -26,6 +26,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { seasons, season, setSeasonId } = useSeason();
   const { user } = useSession();
+  const access = useAccess();
   const navigate = useNavigate();
 
   return (
