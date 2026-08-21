@@ -301,6 +301,117 @@ export type Database = {
           },
         ]
       }
+      membership_history: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          player_id: string | null
+          reason: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          started_at: string
+          team_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          player_id?: string | null
+          reason?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          started_at?: string
+          team_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          player_id?: string | null
+          reason?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          started_at?: string
+          team_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_history_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membership_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          player_id: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          team_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          player_id?: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          player_id?: string | null
+          requested_role?: Database["public"]["Enums"]["app_role"]
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_requests_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_requests_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news: {
         Row: {
           category: string
@@ -471,6 +582,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          status: string
         }
         Insert: {
           avatar_url?: string | null
@@ -479,6 +591,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          status?: string
         }
         Update: {
           avatar_url?: string | null
@@ -487,6 +600,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -996,6 +1110,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_user_membership: {
+        Args: {
+          _player_id?: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _team_id?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      claim_first_admin: { Args: never; Returns: boolean }
+      has_any_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1006,6 +1131,10 @@ export type Database = {
       manages_team: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      review_membership_request: {
+        Args: { _approve: boolean; _notes?: string; _request_id: string }
+        Returns: undefined
       }
     }
     Enums: {
