@@ -76,9 +76,11 @@ function Vincular() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (access.profile !== "user" && !access.loading) {
-    navigate({ to: access.panelPath, replace: true });
-  }
+  useEffect(() => {
+    if (!access.loading && access.profile !== "user") {
+      navigate({ to: access.panelPath, replace: true });
+    }
+  }, [access.loading, access.profile, access.panelPath, navigate]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
