@@ -91,7 +91,7 @@ function PainelAtleta() {
         </div>
         {team && (
           <Link to="/clubes/$teamId" params={{ teamId: team.id }} className="flex items-center gap-2">
-            <TeamCrest team={team} className="h-10 w-10" />
+            <TeamCrest name={team.name} short={team.short_name} crest={team.crest_url} size="sm" />
             <span className="font-display font-bold uppercase">{team.short_name}</span>
           </Link>
         )}

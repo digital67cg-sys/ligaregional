@@ -20,6 +20,7 @@ import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RegulamentoRouteImport } from './routes/regulamento'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAtletaRouteImport } from './routes/_authenticated/atleta'
 import { Route as AuthenticatedClubeRouteImport } from './routes/_authenticated/clube'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
@@ -85,6 +86,11 @@ const SobreRoute = SobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAtletaRoute = AuthenticatedAtletaRouteImport.update({
   id: '/atleta',
   path: '/atleta',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/atleta': typeof AuthenticatedAtletaRoute
   '/clube': typeof AuthenticatedClubeRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/atleta': typeof AuthenticatedAtletaRoute
   '/clube': typeof AuthenticatedClubeRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/atleta': typeof AuthenticatedAtletaRoute
   '/_authenticated/clube': typeof AuthenticatedClubeRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/admin'
     | '/atleta'
     | '/clube'
     | '/painel'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/admin'
     | '/atleta'
     | '/clube'
     | '/painel'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/_authenticated/admin'
     | '/_authenticated/atleta'
     | '/_authenticated/clube'
     | '/_authenticated/painel'
@@ -373,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/atleta': {
       id: '/_authenticated/atleta'
       path: '/atleta'
@@ -447,6 +466,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAtletaRoute: typeof AuthenticatedAtletaRoute
   AuthenticatedClubeRoute: typeof AuthenticatedClubeRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
@@ -454,6 +474,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAtletaRoute: AuthenticatedAtletaRoute,
   AuthenticatedClubeRoute: AuthenticatedClubeRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
