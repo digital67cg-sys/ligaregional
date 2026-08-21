@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtilhariaRouteImport } from './routes/artilharia'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
 import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as RankingRouteImport } from './routes/ranking'
@@ -37,6 +38,11 @@ const ArtilhariaRoute = ArtilhariaRouteImport.update({
 const ClassificacaoRoute = ClassificacaoRouteImport.update({
   id: '/classificacao',
   path: '/classificacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstatisticasRoute = EstatisticasRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
   '/noticias': typeof NoticiasRoute
   '/ranking': typeof RankingRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
   '/noticias': typeof NoticiasRoute
   '/ranking': typeof RankingRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
   '/noticias': typeof NoticiasRoute
   '/ranking': typeof RankingRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artilharia'
     | '/classificacao'
+    | '/contato'
     | '/estatisticas'
     | '/noticias'
     | '/ranking'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artilharia'
     | '/classificacao'
+    | '/contato'
     | '/estatisticas'
     | '/noticias'
     | '/ranking'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artilharia'
     | '/classificacao'
+    | '/contato'
     | '/estatisticas'
     | '/noticias'
     | '/ranking'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArtilhariaRoute: typeof ArtilhariaRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
+  ContatoRoute: typeof ContatoRoute
   EstatisticasRoute: typeof EstatisticasRoute
   NoticiasRoute: typeof NoticiasRoute
   RankingRoute: typeof RankingRoute
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/classificacao'
       fullPath: '/classificacao'
       preLoaderRoute: typeof ClassificacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estatisticas': {
@@ -319,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtilhariaRoute: ArtilhariaRoute,
   ClassificacaoRoute: ClassificacaoRoute,
+  ContatoRoute: ContatoRoute,
   EstatisticasRoute: EstatisticasRoute,
   NoticiasRoute: NoticiasRoute,
   RankingRoute: RankingRoute,
