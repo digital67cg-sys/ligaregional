@@ -89,6 +89,67 @@ export type Database = {
         }
         Relationships: []
       }
+      awards: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          notes: string | null
+          player_id: string | null
+          season_id: string
+          status: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          player_id?: string | null
+          season_id: string
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          player_id?: string | null
+          season_id?: string
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "awards_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "awards_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_ranking_points: {
         Row: {
           achievement: string | null
@@ -139,6 +200,8 @@ export type Database = {
           instagram: string | null
           league_name: string
           logo_url: string | null
+          maintenance_message: string | null
+          maintenance_mode: boolean
           ranking_points: Json
           tagline: string
         }
@@ -149,6 +212,8 @@ export type Database = {
           instagram?: string | null
           league_name?: string
           logo_url?: string | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
           ranking_points?: Json
           tagline?: string
         }
@@ -159,10 +224,53 @@ export type Database = {
           instagram?: string | null
           league_name?: string
           logo_url?: string | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
           ranking_points?: Json
           tagline?: string
         }
         Relationships: []
+      }
+      maintenance_log: {
+        Row: {
+          admin_id: string | null
+          affected_matches: number
+          backup_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          operation: string
+          season_id: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          affected_matches?: number
+          backup_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation: string
+          season_id?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          affected_matches?: number
+          backup_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation?: string
+          season_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_log_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       match_events: {
         Row: {
@@ -170,6 +278,7 @@ export type Database = {
           id: string
           match_id: string
           minute: number | null
+          note: string | null
           player_id: string | null
           team_id: string | null
           type: string
@@ -179,6 +288,7 @@ export type Database = {
           id?: string
           match_id: string
           minute?: number | null
+          note?: string | null
           player_id?: string | null
           team_id?: string | null
           type: string
@@ -188,6 +298,7 @@ export type Database = {
           id?: string
           match_id?: string
           minute?: number | null
+          note?: string | null
           player_id?: string | null
           team_id?: string | null
           type?: string
@@ -414,31 +525,40 @@ export type Database = {
       }
       news: {
         Row: {
+          author: string | null
           category: string
           content: string | null
           id: string
           image_url: string | null
           published_at: string
+          status: string
           subtitle: string | null
           title: string
+          updated_at: string
         }
         Insert: {
+          author?: string | null
           category?: string
           content?: string | null
           id?: string
           image_url?: string | null
           published_at?: string
+          status?: string
           subtitle?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
+          author?: string | null
           category?: string
           content?: string | null
           id?: string
           image_url?: string | null
           published_at?: string
+          status?: string
           subtitle?: string | null
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -762,6 +882,41 @@ export type Database = {
           },
         ]
       }
+      season_backups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          payload: Json
+          reason: string | null
+          season_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          payload: Json
+          reason?: string | null
+          season_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          payload?: Json
+          reason?: string | null
+          season_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_backups_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       season_teams: {
         Row: {
           id: string
@@ -807,6 +962,7 @@ export type Database = {
           id: string
           is_current: boolean
           name: string
+          notes: string | null
           points_draw: number
           points_win: number
           registration_fee: number
@@ -825,6 +981,7 @@ export type Database = {
           id?: string
           is_current?: boolean
           name: string
+          notes?: string | null
           points_draw?: number
           points_win?: number
           registration_fee?: number
@@ -843,6 +1000,7 @@ export type Database = {
           id?: string
           is_current?: boolean
           name?: string
+          notes?: string | null
           points_draw?: number
           points_win?: number
           registration_fee?: number
@@ -1110,6 +1268,37 @@ export type Database = {
       }
     }
     Functions: {
+      admin_backup_season: {
+        Args: { _reason: string; _season_id: string }
+        Returns: string
+      }
+      admin_delete_team: {
+        Args: { _force?: boolean; _team_id: string }
+        Returns: undefined
+      }
+      admin_generate_fixtures: {
+        Args: {
+          _double_round?: boolean
+          _interval_days?: number
+          _season_id: string
+          _start_date?: string
+          _wipe?: boolean
+        }
+        Returns: number
+      }
+      admin_log: {
+        Args: {
+          _action: string
+          _details?: Json
+          _entity: string
+          _entity_id: string
+        }
+        Returns: undefined
+      }
+      admin_reset_fixtures: { Args: { _season_id: string }; Returns: number }
+      admin_reset_season: { Args: { _season_id: string }; Returns: number }
+      admin_reset_sport: { Args: { _season_id: string }; Returns: number }
+      admin_restore_backup: { Args: { _backup_id: string }; Returns: number }
       admin_set_user_membership: {
         Args: {
           _player_id?: string
@@ -1117,6 +1306,11 @@ export type Database = {
           _team_id?: string
           _user_id: string
         }
+        Returns: undefined
+      }
+      admin_swap_home_away: { Args: { _match_id: string }; Returns: undefined }
+      admin_sync_score_from_events: {
+        Args: { _match_id: string }
         Returns: undefined
       }
       claim_first_admin: { Args: never; Returns: boolean }
