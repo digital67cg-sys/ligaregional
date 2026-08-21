@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClassificacaoRouteImport } from './routes/classificacao'
+import { Route as AtletasIndexRouteImport } from './routes/atletas.index'
+import { Route as AtletasPlayerIdRouteImport } from './routes/atletas.$playerId'
+import { Route as ClubesIndexRouteImport } from './routes/clubes.index'
+import { Route as ClubesTeamIdRouteImport } from './routes/clubes.$teamId'
+import { Route as JogosIndexRouteImport } from './routes/jogos.index'
+import { Route as JogosMatchIdRouteImport } from './routes/jogos.$matchId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClassificacaoRoute = ClassificacaoRouteImport.update({
+  id: '/classificacao',
+  path: '/classificacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletasIndexRoute = AtletasIndexRouteImport.update({
+  id: '/atletas/',
+  path: '/atletas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletasPlayerIdRoute = AtletasPlayerIdRouteImport.update({
+  id: '/atletas/$playerId',
+  path: '/atletas/$playerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubesIndexRoute = ClubesIndexRouteImport.update({
+  id: '/clubes/',
+  path: '/clubes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubesTeamIdRoute = ClubesTeamIdRouteImport.update({
+  id: '/clubes/$teamId',
+  path: '/clubes/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JogosIndexRoute = JogosIndexRouteImport.update({
+  id: '/jogos/',
+  path: '/jogos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JogosMatchIdRoute = JogosMatchIdRouteImport.update({
+  id: '/jogos/$matchId',
+  path: '/jogos/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
+  '/clubes/$teamId': typeof ClubesTeamIdRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
+  '/atletas/': typeof AtletasIndexRoute
+  '/clubes/': typeof ClubesIndexRoute
+  '/jogos/': typeof JogosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
+  '/clubes/$teamId': typeof ClubesTeamIdRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
+  '/atletas': typeof AtletasIndexRoute
+  '/clubes': typeof ClubesIndexRoute
+  '/jogos': typeof JogosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
+  '/clubes/$teamId': typeof ClubesTeamIdRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
+  '/atletas/': typeof AtletasIndexRoute
+  '/clubes/': typeof ClubesIndexRoute
+  '/jogos/': typeof JogosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/classificacao'
+    | '/atletas/$playerId'
+    | '/clubes/$teamId'
+    | '/jogos/$matchId'
+    | '/atletas/'
+    | '/clubes/'
+    | '/jogos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/classificacao'
+    | '/atletas/$playerId'
+    | '/clubes/$teamId'
+    | '/jogos/$matchId'
+    | '/atletas'
+    | '/clubes'
+    | '/jogos'
+  id:
+    | '__root__'
+    | '/'
+    | '/classificacao'
+    | '/atletas/$playerId'
+    | '/clubes/$teamId'
+    | '/jogos/$matchId'
+    | '/atletas/'
+    | '/clubes/'
+    | '/jogos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClassificacaoRoute: typeof ClassificacaoRoute
+  AtletasPlayerIdRoute: typeof AtletasPlayerIdRoute
+  ClubesTeamIdRoute: typeof ClubesTeamIdRoute
+  JogosMatchIdRoute: typeof JogosMatchIdRoute
+  AtletasIndexRoute: typeof AtletasIndexRoute
+  ClubesIndexRoute: typeof ClubesIndexRoute
+  JogosIndexRoute: typeof JogosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/classificacao': {
+      id: '/classificacao'
+      path: '/classificacao'
+      fullPath: '/classificacao'
+      preLoaderRoute: typeof ClassificacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atletas/': {
+      id: '/atletas/'
+      path: '/atletas'
+      fullPath: '/atletas/'
+      preLoaderRoute: typeof AtletasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atletas/$playerId': {
+      id: '/atletas/$playerId'
+      path: '/atletas/$playerId'
+      fullPath: '/atletas/$playerId'
+      preLoaderRoute: typeof AtletasPlayerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubes/': {
+      id: '/clubes/'
+      path: '/clubes'
+      fullPath: '/clubes/'
+      preLoaderRoute: typeof ClubesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubes/$teamId': {
+      id: '/clubes/$teamId'
+      path: '/clubes/$teamId'
+      fullPath: '/clubes/$teamId'
+      preLoaderRoute: typeof ClubesTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jogos/': {
+      id: '/jogos/'
+      path: '/jogos'
+      fullPath: '/jogos/'
+      preLoaderRoute: typeof JogosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jogos/$matchId': {
+      id: '/jogos/$matchId'
+      path: '/jogos/$matchId'
+      fullPath: '/jogos/$matchId'
+      preLoaderRoute: typeof JogosMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClassificacaoRoute: ClassificacaoRoute,
+  AtletasPlayerIdRoute: AtletasPlayerIdRoute,
+  ClubesTeamIdRoute: ClubesTeamIdRoute,
+  JogosMatchIdRoute: JogosMatchIdRoute,
+  AtletasIndexRoute: AtletasIndexRoute,
+  ClubesIndexRoute: ClubesIndexRoute,
+  JogosIndexRoute: JogosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
