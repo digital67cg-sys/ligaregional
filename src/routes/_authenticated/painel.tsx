@@ -224,7 +224,10 @@ function MatchRow({
           <Button
             className="self-end"
             onClick={() => {
-              if (!date || !time) return toast.error("Informe data e horário");
+              if (!date || !time) {
+                toast.error("Informe data e horário");
+                return;
+              }
               onPropose({ match_date: date, kickoff: time, venue });
               setOpen(false);
             }}
@@ -261,8 +264,10 @@ function ScoreRow({
         onClick={() => {
           const h = Number(home);
           const a = Number(away);
-          if (Number.isNaN(h) || Number.isNaN(a) || home === "" || away === "")
-            return toast.error("Informe o placar");
+          if (Number.isNaN(h) || Number.isNaN(a) || home === "" || away === "") {
+            toast.error("Informe o placar");
+            return;
+          }
           onSubmit(h, a);
         }}
       >

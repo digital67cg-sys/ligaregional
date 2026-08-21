@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ArtilhariaRouteImport } from './routes/artilharia'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
@@ -19,6 +20,7 @@ import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RegulamentoRouteImport } from './routes/regulamento'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AtletasIndexRouteImport } from './routes/atletas.index'
 import { Route as AtletasPlayerIdRouteImport } from './routes/atletas.$playerId'
 import { Route as ClubesIndexRouteImport } from './routes/clubes.index'
@@ -29,6 +31,10 @@ import { Route as JogosMatchIdRouteImport } from './routes/jogos.$matchId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtilhariaRoute = ArtilhariaRouteImport.update({
@@ -76,6 +82,11 @@ const SobreRoute = SobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AtletasIndexRoute = AtletasIndexRouteImport.update({
   id: '/atletas/',
   path: '/atletas/',
@@ -118,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
@@ -136,6 +148,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
@@ -146,6 +159,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/artilharia': typeof ArtilhariaRoute
   '/auth': typeof AuthRoute
   '/classificacao': typeof ClassificacaoRoute
@@ -155,6 +169,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/regulamento': typeof RegulamentoRoute
   '/sobre': typeof SobreRoute
+  '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
@@ -175,6 +190,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/painel'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
@@ -193,6 +209,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/painel'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
@@ -202,6 +219,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/artilharia'
     | '/auth'
     | '/classificacao'
@@ -211,6 +229,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/regulamento'
     | '/sobre'
+    | '/_authenticated/painel'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
@@ -221,6 +240,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ArtilhariaRoute: typeof ArtilhariaRoute
   AuthRoute: typeof AuthRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
@@ -245,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artilharia': {
@@ -310,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/painel': {
+      id: '/_authenticated/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/atletas/': {
       id: '/atletas/'
       path: '/atletas'
@@ -355,8 +389,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ArtilhariaRoute: ArtilhariaRoute,
   AuthRoute: AuthRoute,
   ClassificacaoRoute: ClassificacaoRoute,
