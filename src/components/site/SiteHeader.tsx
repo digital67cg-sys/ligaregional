@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu, X, Trophy, LogIn, LayoutDashboard } from "lucide-react";
 import { useSeason } from "@/context/season";
 import { useSession } from "@/hooks/useAuth";
+import { useAccess } from "@/hooks/useAccess";
 import { SEASON_STATUS } from "@/lib/league";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
