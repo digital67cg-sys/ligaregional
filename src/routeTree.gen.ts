@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
 import { Route as JogosIndexRouteImport } from './routes/jogos.index'
+import { Route as JogosMatchIdRouteImport } from './routes/jogos.$matchId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,34 +29,43 @@ const JogosIndexRoute = JogosIndexRouteImport.update({
   path: '/jogos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogosMatchIdRoute = JogosMatchIdRouteImport.update({
+  id: '/jogos/$matchId',
+  path: '/jogos/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
   '/jogos/': typeof JogosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
   '/jogos': typeof JogosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/jogos/$matchId': typeof JogosMatchIdRoute
   '/jogos/': typeof JogosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/classificacao' | '/jogos/'
+  fullPaths: '/' | '/classificacao' | '/jogos/$matchId' | '/jogos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/classificacao' | '/jogos'
-  id: '__root__' | '/' | '/classificacao' | '/jogos/'
+  to: '/' | '/classificacao' | '/jogos/$matchId' | '/jogos'
+  id: '__root__' | '/' | '/classificacao' | '/jogos/$matchId' | '/jogos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
+  JogosMatchIdRoute: typeof JogosMatchIdRoute
   JogosIndexRoute: typeof JogosIndexRoute
 }
 
@@ -82,12 +92,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JogosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogos/$matchId': {
+      id: '/jogos/$matchId'
+      path: '/jogos/$matchId'
+      fullPath: '/jogos/$matchId'
+      preLoaderRoute: typeof JogosMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClassificacaoRoute: ClassificacaoRoute,
+  JogosMatchIdRoute: JogosMatchIdRoute,
   JogosIndexRoute: JogosIndexRoute,
 }
 export const routeTree = rootRouteImport
