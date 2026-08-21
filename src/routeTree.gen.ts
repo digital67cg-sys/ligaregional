@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
 import { Route as AtletasIndexRouteImport } from './routes/atletas.index'
+import { Route as AtletasPlayerIdRouteImport } from './routes/atletas.$playerId'
 import { Route as ClubesIndexRouteImport } from './routes/clubes.index'
 import { Route as ClubesTeamIdRouteImport } from './routes/clubes.$teamId'
 import { Route as JogosIndexRouteImport } from './routes/jogos.index'
@@ -30,6 +31,11 @@ const ClassificacaoRoute = ClassificacaoRouteImport.update({
 const AtletasIndexRoute = AtletasIndexRouteImport.update({
   id: '/atletas/',
   path: '/atletas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletasPlayerIdRoute = AtletasPlayerIdRouteImport.update({
+  id: '/atletas/$playerId',
+  path: '/atletas/$playerId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClubesIndexRoute = ClubesIndexRouteImport.update({
@@ -56,6 +62,7 @@ const JogosMatchIdRoute = JogosMatchIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
   '/atletas/': typeof AtletasIndexRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
   '/atletas': typeof AtletasIndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/classificacao': typeof ClassificacaoRoute
+  '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
   '/jogos/$matchId': typeof JogosMatchIdRoute
   '/atletas/': typeof AtletasIndexRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/classificacao'
+    | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
     | '/atletas/'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/classificacao'
+    | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
     | '/atletas'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/classificacao'
+    | '/atletas/$playerId'
     | '/clubes/$teamId'
     | '/jogos/$matchId'
     | '/atletas/'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
+  AtletasPlayerIdRoute: typeof AtletasPlayerIdRoute
   ClubesTeamIdRoute: typeof ClubesTeamIdRoute
   JogosMatchIdRoute: typeof JogosMatchIdRoute
   AtletasIndexRoute: typeof AtletasIndexRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/atletas'
       fullPath: '/atletas/'
       preLoaderRoute: typeof AtletasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atletas/$playerId': {
+      id: '/atletas/$playerId'
+      path: '/atletas/$playerId'
+      fullPath: '/atletas/$playerId'
+      preLoaderRoute: typeof AtletasPlayerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clubes/': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClassificacaoRoute: ClassificacaoRoute,
+  AtletasPlayerIdRoute: AtletasPlayerIdRoute,
   ClubesTeamIdRoute: ClubesTeamIdRoute,
   JogosMatchIdRoute: JogosMatchIdRoute,
   AtletasIndexRoute: AtletasIndexRoute,
