@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArtilhariaRouteImport } from './routes/artilharia'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
 import { Route as AtletasIndexRouteImport } from './routes/atletas.index'
 import { Route as AtletasPlayerIdRouteImport } from './routes/atletas.$playerId'
@@ -21,6 +22,11 @@ import { Route as JogosMatchIdRouteImport } from './routes/jogos.$matchId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtilhariaRoute = ArtilhariaRouteImport.update({
+  id: '/artilharia',
+  path: '/artilharia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClassificacaoRoute = ClassificacaoRouteImport.update({
@@ -61,6 +67,7 @@ const JogosMatchIdRoute = JogosMatchIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/artilharia': typeof ArtilhariaRoute
   '/classificacao': typeof ClassificacaoRoute
   '/atletas/$playerId': typeof AtletasPlayerIdRoute
   '/clubes/$teamId': typeof ClubesTeamIdRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/artilharia'
     | '/classificacao'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/artilharia'
     | '/classificacao'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/artilharia'
     | '/classificacao'
     | '/atletas/$playerId'
     | '/clubes/$teamId'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArtilhariaRoute: typeof ArtilhariaRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
   AtletasPlayerIdRoute: typeof AtletasPlayerIdRoute
   ClubesTeamIdRoute: typeof ClubesTeamIdRoute
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artilharia': {
+      id: '/artilharia'
+      path: '/artilharia'
+      fullPath: '/artilharia'
+      preLoaderRoute: typeof ArtilhariaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/classificacao': {
@@ -197,6 +217,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArtilhariaRoute: ArtilhariaRoute,
   ClassificacaoRoute: ClassificacaoRoute,
   AtletasPlayerIdRoute: AtletasPlayerIdRoute,
   ClubesTeamIdRoute: ClubesTeamIdRoute,
