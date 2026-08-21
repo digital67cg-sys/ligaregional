@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtilhariaRouteImport } from './routes/artilharia'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const ArtilhariaRoute = ArtilhariaRouteImport.update({
   id: '/artilharia',
   path: '/artilharia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClassificacaoRoute = ClassificacaoRouteImport.update({
@@ -104,6 +110,7 @@ const JogosMatchIdRoute = JogosMatchIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
+  '/auth': typeof AuthRoute
   '/classificacao': typeof ClassificacaoRoute
   '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
+  '/auth': typeof AuthRoute
   '/classificacao': typeof ClassificacaoRoute
   '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/artilharia': typeof ArtilhariaRoute
+  '/auth': typeof AuthRoute
   '/classificacao': typeof ClassificacaoRoute
   '/contato': typeof ContatoRoute
   '/estatisticas': typeof EstatisticasRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/artilharia'
+    | '/auth'
     | '/classificacao'
     | '/contato'
     | '/estatisticas'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/artilharia'
+    | '/auth'
     | '/classificacao'
     | '/contato'
     | '/estatisticas'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/artilharia'
+    | '/auth'
     | '/classificacao'
     | '/contato'
     | '/estatisticas'
@@ -210,6 +222,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArtilhariaRoute: typeof ArtilhariaRoute
+  AuthRoute: typeof AuthRoute
   ClassificacaoRoute: typeof ClassificacaoRoute
   ContatoRoute: typeof ContatoRoute
   EstatisticasRoute: typeof EstatisticasRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/artilharia'
       fullPath: '/artilharia'
       preLoaderRoute: typeof ArtilhariaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/classificacao': {
@@ -338,6 +358,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtilhariaRoute: ArtilhariaRoute,
+  AuthRoute: AuthRoute,
   ClassificacaoRoute: ClassificacaoRoute,
   ContatoRoute: ContatoRoute,
   EstatisticasRoute: EstatisticasRoute,
