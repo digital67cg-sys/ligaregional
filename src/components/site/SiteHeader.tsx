@@ -73,8 +73,10 @@ export function SiteHeader() {
             </select>
           )}
           {user ? (
-            <Button size="sm" onClick={() => navigate({ to: "/painel" })}>
-              <LayoutDashboard className="mr-1.5 h-4 w-4" /> Painel
+            <Button size="sm" onClick={() => navigate({ to: access.panelPath })}>
+              <LayoutDashboard className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">{access.panelLabel}</span>
+              <span className="sm:hidden">Painel</span>
             </Button>
           ) : (
             <Button size="sm" variant="secondary" onClick={() => navigate({ to: "/auth" })}>
