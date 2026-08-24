@@ -73,6 +73,7 @@ function PainelAtleta() {
       <PageHeader
         title="Meu Painel"
         subtitle={`${player?.full_name ?? "Atleta"} · Atleta · ${team?.name ?? "Sem clube"}`}
+        action={<SignOutButton />}
       />
 
       <section className="surface-card mb-8 flex flex-wrap items-center gap-4 p-5">
