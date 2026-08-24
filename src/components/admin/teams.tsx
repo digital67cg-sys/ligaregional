@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmButton, Panel, SelectField, TextField } from "@/components/admin/ui";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { callRpc, db, logAction, seasonTeamsQuery } from "@/lib/admin";
 import { teamsQuery, type Team } from "@/lib/league";
 import { useSeason } from "@/context/season";
