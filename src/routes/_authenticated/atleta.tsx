@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/components/site/PageHeader";
 import { TeamCrest } from "@/components/site/TeamCrest";
 import { requireAthlete } from "@/lib/guards";
+import { SignOutButton } from "@/components/site/SignOutButton";
 
 export const Route = createFileRoute("/_authenticated/atleta")({
   beforeLoad: () => requireAthlete(),
