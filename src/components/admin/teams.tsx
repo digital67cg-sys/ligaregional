@@ -110,6 +110,8 @@ export function TeamsSection() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveError = save.error instanceof Error ? save.error.message : null;
+
   const toggleSeason = useMutation({
     mutationFn: async (input: { teamId: string; add: boolean }) => {
       if (!season) throw new Error("Selecione uma temporada");
