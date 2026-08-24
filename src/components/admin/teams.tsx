@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmButton, Panel, SelectField, TextField } from "@/components/admin/ui";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { callRpc, db, logAction, seasonTeamsQuery } from "@/lib/admin";
 import { teamsQuery, type Team } from "@/lib/league";
 import { useSeason } from "@/context/season";
@@ -108,6 +109,8 @@ export function TeamsSection() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const saveError = save.error instanceof Error ? save.error.message : null;
 
   const toggleSeason = useMutation({
     mutationFn: async (input: { teamId: string; add: boolean }) => {
@@ -239,9 +242,20 @@ export function TeamsSection() {
         </div>
       </Panel>
 
-      {editing && (
-        <Panel title={editing === "new" ? "Nova equipe" : "Editar equipe"}>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <Dialog
+        open={!!editing}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditing(null);
+            save.reset();
+          }
+        }}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase">{editing === "new" ? "Nova equipe" : "Editar equipe"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 sm:grid-cols-2">
             <TextField label="Nome" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
             <TextField label="Nome abreviado" value={form.short_name} onChange={(v) => setForm({ ...form, short_name: v })} />
             <TextField label="Escudo (URL)" value={form.crest_url} onChange={(v) => setForm({ ...form, crest_url: v })} />
@@ -264,16 +278,19 @@ export function TeamsSection() {
               ]}
             />
           </div>
-          <div className="mt-3 flex gap-2">
-            <Button onClick={() => save.mutate()} disabled={!form.name}>
-              Salvar
-            </Button>
+          {saveError && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-sm text-destructive">{saveError}</p>
+          )}
+          <DialogFooter>
             <Button variant="secondary" onClick={() => setEditing(null)}>
               Cancelar
             </Button>
-          </div>
-        </Panel>
-      )}
+            <Button onClick={() => save.mutate()} disabled={!form.name.trim() || save.isPending}>
+              {save.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
