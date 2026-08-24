@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requireClubManager } from "@/lib/guards";
+import { SignOutButton } from "@/components/site/SignOutButton";
 
 export const Route = createFileRoute("/_authenticated/clube")({
   beforeLoad: () => requireClubManager(),
@@ -154,7 +155,7 @@ function PainelClube() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <PageHeader title="Painel do Clube" subtitle={`${team?.name ?? "Clube"} · Gestor`} />
+      <PageHeader title="Painel do Clube" subtitle={`${team?.name ?? "Clube"} · Gestor`} action={<SignOutButton />} />
 
       {myTeams.length > 1 && (
         <select

@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/components/site/PageHeader";
 import { TeamCrest } from "@/components/site/TeamCrest";
 import { requireAthlete } from "@/lib/guards";
+import { SignOutButton } from "@/components/site/SignOutButton";
 
 export const Route = createFileRoute("/_authenticated/atleta")({
   beforeLoad: () => requireAthlete(),
@@ -73,6 +74,7 @@ function PainelAtleta() {
       <PageHeader
         title="Meu Painel"
         subtitle={`${player?.full_name ?? "Atleta"} · Atleta · ${team?.name ?? "Sem clube"}`}
+        action={<SignOutButton />}
       />
 
       <section className="surface-card mb-8 flex flex-wrap items-center gap-4 p-5">
