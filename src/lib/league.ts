@@ -117,9 +117,13 @@ export const seasonsQuery = queryOptions({
   queryFn: () => rows<Season>(db.from("seasons").select("*").order("year", { ascending: false })),
 });
 
+/** Colunas de clubes visíveis publicamente (sem dados de contato do responsável). */
+export const TEAM_PUBLIC_COLUMNS =
+  "id, name, short_name, crest_url, city, district, colors, founded_year, instagram, status";
+
 export const teamsQuery = queryOptions({
   queryKey: ["teams"],
-  queryFn: () => rows<Team>(db.from("teams").select("*").order("name")),
+  queryFn: () => rows<Team>(db.from("teams").select(TEAM_PUBLIC_COLUMNS).order("name")),
 });
 
 export const playersQuery = queryOptions({
