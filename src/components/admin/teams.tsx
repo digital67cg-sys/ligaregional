@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmButton, Panel, SelectField, TextField } from "@/components/admin/ui";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { callRpc, db, logAction, seasonTeamsQuery } from "@/lib/admin";
-import { teamsQuery, type Team } from "@/lib/league";
+import { adminTeamsQuery, callRpc, db, logAction, seasonTeamsQuery } from "@/lib/admin";
+import type { TeamFull as Team } from "@/lib/admin";
 import { useSeason } from "@/context/season";
 
 type Form = {
@@ -42,7 +42,7 @@ const empty: Form = {
 export function TeamsSection() {
   const qc = useQueryClient();
   const { season } = useSeason();
-  const { data: teams = [] } = useQuery(teamsQuery);
+  const { data: teams = [] } = useQuery(adminTeamsQuery);
   const { data: seasonTeams = [] } = useQuery(seasonTeamsQuery(season?.id));
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "season_matches", season?.id],
@@ -70,6 +70,7 @@ export function TeamsSection() {
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["teams"] });
+    qc.invalidateQueries({ queryKey: ["admin", "teams_full"] });
     qc.invalidateQueries({ queryKey: ["season_teams"] });
     qc.invalidateQueries({ queryKey: ["standings"] });
     qc.invalidateQueries({ queryKey: ["admin"] });
