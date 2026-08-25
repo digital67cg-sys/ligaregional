@@ -148,3 +148,25 @@ export const SEASON_STATUS_OPTIONS = [
   { value: "finished", label: "Encerrada" },
   { value: "archived", label: "Arquivada" },
 ];
+
+/** Clubes com dados de contato — restrito às telas administrativas. */
+export const adminTeamsQuery = queryOptions({
+  queryKey: ["admin", "teams_full"],
+  queryFn: () => rows<TeamFull>(db.from("teams").select("*").order("name")),
+});
+
+export type TeamFull = {
+  id: string;
+  name: string;
+  short_name: string;
+  crest_url: string | null;
+  city: string | null;
+  district: string | null;
+  colors: string | null;
+  founded_year: number | null;
+  responsible_name: string | null;
+  phone: string | null;
+  email: string | null;
+  instagram: string | null;
+  status: string;
+};
