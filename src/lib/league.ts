@@ -24,9 +24,10 @@ export type Team = {
   district: string | null;
   colors: string | null;
   founded_year: number | null;
-  responsible_name: string | null;
-  phone: string | null;
-  email: string | null;
+  /** Contatos só são carregados nas telas administrativas. */
+  responsible_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
   instagram: string | null;
   status: string;
 };
