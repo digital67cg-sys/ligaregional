@@ -24,9 +24,10 @@ export type Team = {
   district: string | null;
   colors: string | null;
   founded_year: number | null;
-  responsible_name: string | null;
-  phone: string | null;
-  email: string | null;
+  /** Contatos só são carregados nas telas administrativas. */
+  responsible_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
   instagram: string | null;
   status: string;
 };
@@ -117,9 +118,13 @@ export const seasonsQuery = queryOptions({
   queryFn: () => rows<Season>(db.from("seasons").select("*").order("year", { ascending: false })),
 });
 
+/** Colunas de clubes visíveis publicamente (sem dados de contato do responsável). */
+export const TEAM_PUBLIC_COLUMNS =
+  "id, name, short_name, crest_url, city, district, colors, founded_year, instagram, status";
+
 export const teamsQuery = queryOptions({
   queryKey: ["teams"],
-  queryFn: () => rows<Team>(db.from("teams").select("*").order("name")),
+  queryFn: () => rows<Team>(db.from("teams").select(TEAM_PUBLIC_COLUMNS).order("name")),
 });
 
 export const playersQuery = queryOptions({
