@@ -22,6 +22,17 @@ export type Access = {
 
 const db = supabase as unknown as { from: (t: string) => any };
 
+/**
+ * Erros de autorização nunca podem virar "usuário sem perfil": uma falha de
+ * leitura (RLS, privilégio, rede) rebaixaria um administrador legítimo a
+ * usuário comum. Propagamos o erro para o React Query em vez de silenciá-lo.
+ */
+function assertNoError(result: { error?: { message?: string } | null }, what: string) {
+  if (result?.error) {
+    throw new Error(`Falha ao verificar permissões (${what}): ${result.error.message ?? "erro desconhecido"}`);
+  }
+}
+
 export function useAccess(): Access {
   const { user, loading: sessionLoading } = useSession();
   const userId = user?.id;
@@ -41,6 +52,10 @@ export function useAccess(): Access {
           .order("created_at", { ascending: false })
           .limit(1),
       ]);
+      assertNoError(roles, "perfis");
+      assertNoError(managed, "clubes gerenciados");
+      assertNoError(players, "cadastro de atleta");
+      assertNoError(requests, "solicitações de vínculo");
       const player = (players.data ?? [])[0] ?? null;
       const request = (requests.data ?? [])[0] ?? null;
       return {
@@ -53,6 +68,7 @@ export function useAccess(): Access {
       };
     },
   });
+
 
   const roles = query.data?.roles ?? [];
   const teamIds = query.data?.teamIds ?? [];
