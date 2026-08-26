@@ -1313,6 +1313,10 @@ export type Database = {
         Args: { _match_id: string }
         Returns: undefined
       }
+      can_request_referee: {
+        Args: { _match_id: string; _user_id: string }
+        Returns: boolean
+      }
       claim_first_admin: { Args: never; Returns: boolean }
       has_any_admin: { Args: never; Returns: boolean }
       has_role: {
