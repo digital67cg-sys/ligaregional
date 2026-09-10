@@ -13,6 +13,12 @@ export type Season = {
   affiliation_fee: number;
   transfer_window_start: string | null;
   transfer_window_end: string | null;
+  competition_type: string;
+  group_count: number | null;
+  qualified_per_group: number | null;
+  knockout_config: Record<string, unknown> | null;
+  draw_rule: string | null;
+  draw_resolution_rule: string | null;
 };
 
 export type Team = {
@@ -61,6 +67,17 @@ export type Match = {
   homologated: boolean;
   away_confirmed: boolean;
   notes: string | null;
+  group_id?: string | null;
+  stage?: string | null;
+  knockout_round?: string | null;
+  bracket_position?: number | null;
+  source_match_1_id?: string | null;
+  source_match_2_id?: string | null;
+  winner_id?: string | null;
+  penalty_home_score?: number | null;
+  penalty_away_score?: number | null;
+  extra_time_home_score?: number | null;
+  extra_time_away_score?: number | null;
 };
 
 export type StandingRow = {
@@ -199,6 +216,69 @@ export const matchesQuery = (seasonId: string | undefined) =>
           .order("round")
           .order("match_date"),
       ),
+  });
+
+export type CompetitionGroup = {
+  id: string;
+  season_id: string;
+  name: string;
+  created_at: string;
+};
+
+export type CompetitionGroupTeam = {
+  id: string;
+  season_id: string;
+  group_id: string;
+  team_id: string;
+  created_at: string;
+};
+
+export type CompetitionQualifiedTeam = {
+  id: string;
+  season_id: string;
+  group_id: string;
+  team_id: string;
+  qualification_position: number;
+  created_at: string;
+};
+
+export type CompetitionKnockoutStage = {
+  id: string;
+  season_id: string;
+  name: string;
+  stage_type: string;
+  stage_order: number;
+  teams_count: number | null;
+  matches_count: number | null;
+  created_at: string;
+};
+
+export const competitionGroupsQuery = (seasonId: string | undefined) =>
+  queryOptions({
+    queryKey: ["competition_groups", seasonId],
+    enabled: !!seasonId,
+    queryFn: () => rows<CompetitionGroup>(db.from("competition_groups").select("*").eq("season_id", seasonId).order("name")),
+  });
+
+export const competitionGroupTeamsQuery = (seasonId: string | undefined) =>
+  queryOptions({
+    queryKey: ["competition_group_teams", seasonId],
+    enabled: !!seasonId,
+    queryFn: () => rows<CompetitionGroupTeam>(db.from("competition_group_teams").select("*").eq("season_id", seasonId)),
+  });
+
+export const competitionQualifiedTeamsQuery = (seasonId: string | undefined) =>
+  queryOptions({
+    queryKey: ["competition_qualified_teams", seasonId],
+    enabled: !!seasonId,
+    queryFn: () => rows<CompetitionQualifiedTeam>(db.from("competition_qualified_teams").select("*").eq("season_id", seasonId).order("qualification_position")),
+  });
+
+export const competitionKnockoutStagesQuery = (seasonId: string | undefined) =>
+  queryOptions({
+    queryKey: ["competition_knockout_stages", seasonId],
+    enabled: !!seasonId,
+    queryFn: () => rows<CompetitionKnockoutStage>(db.from("competition_knockout_stages").select("*").eq("season_id", seasonId).order("stage_order")),
   });
 
 export const standingsQuery = (seasonId: string | undefined) =>

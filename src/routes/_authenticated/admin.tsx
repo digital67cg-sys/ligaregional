@@ -18,6 +18,7 @@ import { NewsSection } from "@/components/admin/news";
 import { AwardsSection, FeesSection, FinanceOverview } from "@/components/admin/finance";
 import { RefereesSection, RequestsSection, TransfersSection, UsersSection } from "@/components/admin/people";
 import { MaintenanceSection } from "@/components/admin/maintenance";
+import { KnockoutSection } from "@/components/admin/knockout";
 import { LogsSection, RegulationSection, SettingsSection } from "@/components/admin/misc";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const GROUPS = [
   { group: "Visão geral", items: ["Dashboard"] },
-  { group: "Competição", items: ["Temporadas", "Rodadas", "Partidas", "Súmulas", "Classificação", "Estatísticas", "Artilharia", "Ranking", "Recordes"] },
+  { group: "Competição", items: ["Temporadas", "Rodadas", "Partidas", "Súmulas", "Classificação", "Taça Regional", "Estatísticas", "Artilharia", "Ranking", "Recordes"] },
   { group: "Participantes", items: ["Clubes", "Atletas", "Transferências", "Arbitragem"] },
   { group: "Financeiro", items: ["Financeiro", "Filiações", "Inscrições", "Premiação"] },
   { group: "Conteúdo", items: ["Notícias", "Regulamento"] },
@@ -163,6 +164,7 @@ function PainelAdmin() {
           {tab === "Partidas" && <MatchesSection />}
           {tab === "Súmulas" && <MatchesSection onlyPending />}
           {tab === "Classificação" && <StandingsSection />}
+          {tab === "Taça Regional" && <KnockoutSection />}
           {tab === "Estatísticas" && <StatsSection />}
           {tab === "Artilharia" && <ScorersSection />}
           {tab === "Ranking" && <RankingSection />}
