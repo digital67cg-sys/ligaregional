@@ -125,7 +125,13 @@ function PainelAdmin() {
                   <button
                     key={item}
                     type="button"
-                    onClick={() => setTab(item)}
+                    onClick={() => {
+                      if (item === "Taça Regional" && (season as any)?.competition_type !== "grupos_mata_mata") {
+                        const target = seasons.find((s) => (s as any).competition_type === "grupos_mata_mata" && s.year === season?.year) || seasons.find((s) => (s as any).competition_type === "grupos_mata_mata");
+                        if (target) setSeasonId(target.id);
+                      }
+                      setTab(item);
+                    }}
                     className={`rounded-md px-3 py-1.5 text-left text-sm font-semibold ${
                       tab === item ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
                     }`}
@@ -183,7 +189,34 @@ function PainelAdmin() {
           {tab === "Partidas" && <MatchesSection />}
           {tab === "Súmulas" && <MatchesSection onlyPending />}
           {tab === "Classificação" && <StandingsSection />}
-          {tab === "Taça Regional" && <KnockoutSection />}
+          {tab === "Taça Regional" && (
+            (season as any)?.competition_type === "grupos_mata_mata" ? (
+              <KnockoutSection />
+            ) : (
+              <Panel title="Gerenciamento da Taça Regional">
+                <div className="flex flex-col items-center justify-center space-y-4 p-8 text-center">
+                  <p className="text-muted-foreground">Selecione uma competição do tipo Grupos + Mata-Mata para gerenciar a Taça Regional.</p>
+                  <select
+                    title="Selecione a Taça Regional"
+                    value={season?.id || ""}
+                    onChange={(e) => setSeasonId(e.target.value)}
+                    className="h-9 w-64 cursor-pointer rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    {seasons.map((s) => {
+                      const yearVal = (s as any).year;
+                      const yearStr = yearVal ? ` ${yearVal}` : "";
+                      const displayName = String(s.name).includes(String(yearVal || "")) ? s.name : `${s.name}${yearStr}`;
+                      return (
+                        <option key={s.id} value={s.id}>
+                          {displayName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </Panel>
+            )
+          )}
           {tab === "Estatísticas" && <StatsSection />}
           {tab === "Artilharia" && <ScorersSection />}
           {tab === "Ranking" && <RankingSection />}
