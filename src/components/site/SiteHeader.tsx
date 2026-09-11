@@ -37,9 +37,9 @@ export function SiteHeader() {
             <Trophy className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="leading-none">
-            <span className="block text-stadium text-lg">{season?.name || "Liga Regional"}</span>
+            <span className="block text-stadium text-lg uppercase">{season?.name || "LIGA REGIONAL"}</span>
             <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              {season ? `${season.year} · ${SEASON_STATUS[season.status] ?? season.status}` : "Temporada"}
+              {season ? `${season.year} • ${SEASON_STATUS[season.status] ?? season.status}` : "TEMPORADA"}
             </span>
           </span>
         </Link>
