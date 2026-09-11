@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmButton, EmptyState, Panel, SelectField, TextField } from "@/components/admin/ui";
 import { callRpc, db, logAction, MATCH_STATUS_OPTIONS } from "@/lib/admin";
-import { formatDate, matchesQuery, playersQuery, teamsQuery, type Match } from "@/lib/league";
+import { competitionGroupsQuery, formatDate, matchesQuery, playersQuery, teamsQuery, type Match } from "@/lib/league";
 import { useSeason } from "@/context/season";
 
 function useRefresh() {
@@ -437,10 +437,15 @@ function MatchRow({
         : { homologated: false, status: "finished" };
       const { error } = await db.from("matches").update(patch).eq("id", match.id);
       if (error) throw error;
+
+      if (value && match.stage === "mata_mata") {
+        await callRpc("process_competition_knockout_match", { p_match_id: match.id });
+      }
+
       await logAction(value ? "Resultado homologado" : "Partida reaberta", "matches", match.id, patch);
     },
     onSuccess: () => {
-      toast.success("Situação da partida atualizada");
+      toast.success(match.stage === "mata_mata" ? "Partida homologada e mata-mata atualizado" : "Situação da partida atualizada");
       refresh();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -532,6 +537,11 @@ function MatchRow({
                 description="O placar informado substituirá o cálculo automático da súmula. A alteração será registrada nos logs."
                 onConfirm={() => update.mutate({ home_score: Number(home || 0), away_score: Number(away || 0), status: "finished" })}
               />
+              {match.stage === "mata_mata" && (
+                <span className="w-full text-xs text-muted-foreground">
+                  Em caso de empate, o vencedor do mata-mata é processado pela função oficial após a homologação.
+                </span>
+              )}
               {match.homologated ? (
                 <ConfirmButton
                   label="Reabrir partida"

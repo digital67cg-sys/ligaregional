@@ -295,7 +295,17 @@ export function KnockoutSection() {
 
       {tab === "knockout" && <div className="space-y-4"><Panel title="Fases do mata-mata"><div className="grid gap-3 md:grid-cols-5"><TextField label="Nome" value={stage.name} onChange={(value) => setStage({ ...stage, name: value })} /><TextField label="Tipo" value={stage.stage_type} onChange={(value) => setStage({ ...stage, stage_type: value })} /><TextField label="Ordem" type="number" value={stage.stage_order} onChange={(value) => setStage({ ...stage, stage_order: value })} /><TextField label="Equipes" type="number" value={stage.teams_count} onChange={(value) => setStage({ ...stage, teams_count: value })} /><Button className="mt-auto" disabled={!stage.name.trim()} onClick={() => createStage.mutate()}>Criar fase</Button></div><div className="mt-4 divide-y divide-border">{stages.map((item) => <div key={item.id} className="flex justify-between py-2 text-sm"><span>{item.stage_order}. {item.name}</span><span className="text-muted-foreground">{item.stage_type} · {item.matches_count ?? 0} jogos</span></div>)}</div></Panel><Panel title="Processamento das partidas eliminatórias">{knockoutMatches.length === 0 && <EmptyState>Nenhuma partida de mata-mata encontrada.</EmptyState>}<div className="divide-y divide-border">{knockoutMatches.map((match) => <div key={match.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><span>{shortTeamName(match.home_team_id)} {match.home_score ?? "-"} × {match.away_score ?? "-"} {shortTeamName(match.away_team_id)}</span><Button size="sm" variant="secondary" onClick={() => process.mutate(match.id)}>Processar vencedor</Button></div>)}</div></Panel></div>}
 
-      {tab === "matches" && <div className="space-y-3"><Panel title="Jogos da Taça Regional"><p className="text-sm text-muted-foreground">A listagem abaixo utiliza exclusivamente a temporada selecionada: {season.name}.</p></Panel><MatchesSection /></div>}
+      {tab === "matches" && (
+        <div className="space-y-3">
+          <Panel title="Jogos da Taça Regional">
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>A listagem abaixo utiliza exclusivamente a temporada selecionada: {season.name}.</p>
+              <p>Partidas homologadas atualizam os dados da competição; partidas eliminatórias acionam automaticamente o processamento oficial do mata-mata.</p>
+            </div>
+          </Panel>
+          <MatchesSection />
+        </div>
+      )}
 
       {tab === "settings" && <Panel title="Configuração da Taça Regional"><div className="grid gap-3 sm:grid-cols-3"><TextField label="Número de equipes" type="number" value={config.team_count} onChange={(value) => setConfig({ ...config, team_count: value })} /><TextField label="Número de grupos" type="number" value={config.group_count} onChange={(value) => setConfig({ ...config, group_count: value })} /><TextField label="Classificados por grupo" type="number" value={config.qualified_per_group} onChange={(value) => setConfig({ ...config, qualified_per_group: value })} /></div><Button className="mt-4" onClick={() => updateConfig.mutate()}>Salvar configuração</Button><p className="mt-3 text-xs text-muted-foreground">As configurações são salvas na temporada selecionada e não alteram outras competições.</p></Panel>}
     </div>
