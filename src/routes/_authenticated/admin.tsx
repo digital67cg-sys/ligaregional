@@ -53,7 +53,7 @@ type Tab = (typeof GROUPS)[number]["items"][number];
 function PainelAdmin() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { season, seasons } = useSeason();
+  const { season, seasons, setSeasonId } = useSeason();
   const [tab, setTab] = useState<Tab>("Dashboard");
 
   const { data: teams = [] } = useQuery(teamsQuery);
@@ -88,11 +88,30 @@ function PainelAdmin() {
     <div className="mx-auto max-w-7xl px-4 py-10">
       <PageHeader
         title="Painel Administrativo"
-        subtitle={`Administrador da Liga Regional${season ? ` · ${season.name}` : ""}`}
+        subtitle={`Gerenciamento · ${season?.name ?? "Competição"}`}
         action={
-          <Button variant="secondary" size="sm" onClick={signOut}>
-            Sair
-          </Button>
+          <div className="flex items-center gap-3">
+            <select
+              title="Selecione a competição"
+              value={season?.id || ""}
+              onChange={(e) => setSeasonId(e.target.value)}
+              className="h-9 cursor-pointer rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {seasons.map((s) => {
+                const yearVal = (s as any).year;
+                const yearStr = yearVal ? ` ${yearVal}` : "";
+                const displayName = String(s.name).includes(String(yearVal || "")) ? s.name : `${s.name}${yearStr}`;
+                return (
+                  <option key={s.id} value={s.id}>
+                    {displayName}
+                  </option>
+                );
+              })}
+            </select>
+            <Button variant="secondary" size="sm" onClick={signOut}>
+              Sair
+            </Button>
+          </div>
         }
       />
 
