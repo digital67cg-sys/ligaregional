@@ -67,8 +67,24 @@ export function KnockoutSection() {
     qc.invalidateQueries({ queryKey: ["seasons"] });
   };
 
+  const registeredTeamIds = [...new Set(groupTeams.map((item) => item.team_id))];
+  const registeredTeamCount = registeredTeamIds.length;
+  const configuredTeamCount = registeredTeamCount || Number(config.team_count || 0);
+  const configuredGroupCount = Number(config.group_count || 0);
+  const configuredQualifiedPerGroup = Number(config.qualified_per_group || 0);
+  const teamsPerGroup = configuredGroupCount > 0 && configuredTeamCount > 0 && configuredTeamCount % configuredGroupCount === 0
+    ? configuredTeamCount / configuredGroupCount
+    : null;
+  const totalQualified = configuredGroupCount * configuredQualifiedPerGroup;
+  const validKnockoutSizes = [2, 4, 8, 16];
+  const knockoutIsValid = validKnockoutSizes.includes(totalQualified);
+  const groupsAreBalanced = Boolean(teamsPerGroup);
+  const groupsAreComplete = groups.length > 0 && groups.every((group) => {
+    const members = groupTeams.filter((item) => item.group_id === group.id).length;
+    return teamsPerGroup !== null && members === teamsPerGroup;
+  });
   const groupTeamCount = groupTeams.length;
-  const groupMatches = matches.filter((match) => match.stage !== "mata_mata");
+  const groupMatches = matches.filter((match) => match.stage === "grupos");
   const knockoutMatches = matches.filter((match) => match.stage === "mata_mata");
   const playedMatches = matches.filter((match) => match.homologated);
   const goals = playedMatches.reduce(
@@ -124,6 +140,11 @@ export function KnockoutSection() {
   const assign = useMutation({
     mutationFn: async () => {
       if (!season?.id || !selectedGroup || !selectedTeam) throw new Error("Selecione o grupo e a equipe.");
+      const alreadyAssigned = groupTeams.some((item) => item.team_id === selectedTeam);
+      if (alreadyAssigned) throw new Error("Esta equipe já está vinculada a outro grupo desta Taça.");
+      if (teamsPerGroup !== null && groupTeams.filter((item) => item.group_id === selectedGroup).length >= teamsPerGroup) {
+        throw new Error("Este grupo já atingiu o limite de equipes configurado.");
+      }
       const { error } = await db.from("competition_group_teams").insert({
         season_id: season.id,
         group_id: selectedGroup,
@@ -187,11 +208,37 @@ export function KnockoutSection() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const generateGroups = useMutation({
+    mutationFn: async () => {
+      if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
+      if (!configuredGroupCount || configuredGroupCount < 2) throw new Error("Informe pelo menos dois grupos.");
+      if (!configuredTeamCount) throw new Error("Nenhuma equipe cadastrada para esta Taça.");
+      if (!groupsAreBalanced) throw new Error("Esta configuração não distribui as equipes igualmente entre os grupos. Revise o número de grupos.");
+      const existingNames = new Set(groups.map((group) => group.name.trim().toUpperCase()));
+      const pendingRows = Array.from({ length: configuredGroupCount }, (_, index) => {
+        const name = `Grupo ${String.fromCharCode(65 + index)}`;
+        return existingNames.has(name.toUpperCase()) ? null : { season_id: season.id, name };
+      }).filter(Boolean);
+      if (pendingRows.length) {
+        const { error } = await db.from("competition_groups").insert(pendingRows);
+        if (error) throw error;
+      }
+      return pendingRows.length;
+    },
+    onSuccess: (created) => {
+      refresh();
+      toast.success(created ? `${created} grupos criados.` : "Os grupos já existem.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const generateGroupMatches = useMutation({
     mutationFn: async () => {
       if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
-      if (!groups.length) throw new Error("Crie pelo menos um grupo antes de gerar os jogos.");
-      if (!groupTeams.length) throw new Error("Cadastre as equipes nos grupos antes de gerar os jogos.");
+      if (!groups.length) throw new Error("Gere pelo menos um grupo antes de gerar os jogos.");
+      if (!groupTeams.length) throw new Error("Nenhuma equipe cadastrada para esta Taça.");
+      if (!groupsAreBalanced) throw new Error("Esta configuração não distribui as equipes igualmente entre os grupos. Revise o número de grupos.");
+      if (!groupsAreComplete) throw new Error("Distribua todas as equipes antes de gerar os jogos da fase de grupos.");
 
       const existingGroupIds = new Set(
         matches
@@ -249,13 +296,17 @@ export function KnockoutSection() {
   const updateConfig = useMutation({
     mutationFn: async () => {
       if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
+      if (!configuredGroupCount || configuredGroupCount < 2) throw new Error("Informe pelo menos dois grupos.");
+      if (!configuredQualifiedPerGroup || configuredQualifiedPerGroup < 1) throw new Error("Informe quantos classificados sairão de cada grupo.");
+      if (!groupsAreBalanced) throw new Error("Esta configuração não distribui as equipes igualmente entre os grupos. Revise o número de grupos.");
+      if (!knockoutIsValid) throw new Error("O número de classificados não forma uma chave eliminatória válida. Ajuste o número de grupos ou classificados por grupo.");
       const { error } = await db.from("seasons").update({
-        team_count: config.team_count ? Number(config.team_count) : null,
-        group_count: config.group_count ? Number(config.group_count) : null,
-        qualified_per_group: config.qualified_per_group ? Number(config.qualified_per_group) : null,
+        team_count: registeredTeamCount || (config.team_count ? Number(config.team_count) : null),
+        group_count: configuredGroupCount,
+        qualified_per_group: configuredQualifiedPerGroup,
       }).eq("id", season.id);
       if (error) throw error;
-      await logAction("Configuração da Taça Regional atualizada", "seasons", season.id, config);
+      await logAction("Configuração da Taça Regional atualizada", "seasons", season.id, { ...config, team_count: registeredTeamCount || config.team_count });
     },
     onSuccess: () => {
       refresh();
@@ -263,6 +314,32 @@ export function KnockoutSection() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
+  const populateQualified = useMutation({
+    mutationFn: async () => {
+      if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
+      if (!groupsAreComplete) throw new Error("A fase de grupos ainda não está completa.");
+      const pending = groupMatches.some((match) => !match.homologated);
+      if (pending) throw new Error("A fase de grupos ainda possui partidas pendentes.");
+      return callRpc("populate_competition_qualified_teams", { p_season_id: season.id });
+    },
+    onSuccess: () => { refresh(); toast.success("Classificados atualizados automaticamente."); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const generateKnockout = useMutation({
+    mutationFn: async () => {
+      if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
+      if (!knockoutIsValid) throw new Error("O número de classificados não forma uma chave eliminatória válida.");
+      if (qualified.length !== totalQualified) throw new Error("Defina os classificados antes de gerar o mata-mata.");
+      await callRpc("generate_competition_knockout_bracket", { p_season_id: season.id });
+      return callRpc("create_competition_knockout_matches", { p_season_id: season.id });
+    },
+    onSuccess: () => { refresh(); toast.success("Chaveamento e partidas do mata-mata gerados."); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const knockoutLabel = totalQualified === 2 ? "FINAL" : totalQualified === 4 ? "SEMIFINAL" : totalQualified === 8 ? "QUARTAS DE FINAL" : totalQualified === 16 ? "OITAVAS DE FINAL" : "CONFIGURAÇÃO INVÁLIDA";
 
   const standings = useMemo(() => {
     return groups.map((group) => {
@@ -365,7 +442,7 @@ export function KnockoutSection() {
 
       {tab === "standings" && <div className="space-y-4">{standings.map(({ group, rows }) => <Panel key={group.id} title={`Classificação · ${group.name}`}><div className="-mx-4 overflow-x-auto px-4"><table className="w-full min-w-[680px] text-sm"><thead><tr className="text-left text-[10px] uppercase tracking-wider text-muted-foreground">{["POS", "EQUIPE", "P", "J", "V", "E", "D", "GP", "GC", "SG"].map((header) => <th key={header} className="p-2">{header}</th>)}</tr></thead><tbody>{rows.map((row, index) => <tr key={row.teamId} className="border-t border-border"><td className="p-2">{index + 1}</td><td className="p-2 font-semibold">{teamName(row.teamId)}</td><td className="p-2 font-bold">{row.points}</td><td className="p-2">{row.played}</td><td className="p-2">{row.wins}</td><td className="p-2">{row.draws}</td><td className="p-2">{row.losses}</td><td className="p-2">{row.goalsFor}</td><td className="p-2">{row.goalsAgainst}</td><td className="p-2">{row.goalsFor - row.goalsAgainst}</td></tr>)}</tbody></table></div>{rows.length === 0 && <EmptyState>Nenhuma equipe no grupo.</EmptyState>}</Panel>)}{standings.length === 0 && <Panel title="Classificação"><EmptyState>Nenhum grupo criado.</EmptyState></Panel>}</div>}
 
-      {tab === "qualified" && <Panel title="Classificados para o mata-mata"><div className="mb-4 grid gap-3 md:grid-cols-3"><SelectField label="Grupo" value={selectedGroup} onChange={setSelectedGroup} options={groups.map((group) => ({ value: group.id, label: group.name }))} placeholder="Selecione" /><SelectField label="Equipe" value={selectedTeam} onChange={setSelectedTeam} options={teams.map((team) => ({ value: team.id, label: team.name }))} placeholder="Selecione" /><div className="flex items-end gap-2"><TextField label="Posição" type="number" value={position} onChange={setPosition} /><Button disabled={!selectedGroup || !selectedTeam} onClick={() => qualify.mutate()}>Registrar classificado</Button></div></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{qualified.map((item) => <div key={item.id} className="rounded-md border border-border p-3"><p className="text-xs text-muted-foreground">{groups.find((group) => group.id === item.group_id)?.name ?? "Grupo"}</p><p className="mt-1 font-semibold">{item.qualification_position}º — {teamName(item.team_id)}</p></div>)}</div>{qualified.length === 0 && <EmptyState>Nenhum classificado registrado.</EmptyState>}</Panel>}
+      {tab === "qualified" && <Panel title="Classificados para o mata-mata"><div className="mb-4 flex flex-wrap gap-2"><Button onClick={() => populateQualified.mutate()} disabled={populateQualified.isPending || !groupsAreComplete}>{populateQualified.isPending ? "Calculando..." : "Atualizar classificados automaticamente"}</Button><Button variant="secondary" onClick={() => generateKnockout.mutate()} disabled={generateKnockout.isPending || qualified.length !== totalQualified || !knockoutIsValid}>{generateKnockout.isPending ? "Gerando..." : "Gerar mata-mata"}</Button></div><div className="mb-4 grid gap-3 md:grid-cols-3"><SelectField label="Grupo" value={selectedGroup} onChange={setSelectedGroup} options={groups.map((group) => ({ value: group.id, label: group.name }))} placeholder="Selecione" /><SelectField label="Equipe" value={selectedTeam} onChange={setSelectedTeam} options={teams.map((team) => ({ value: team.id, label: team.name }))} placeholder="Selecione" /><div className="flex items-end gap-2"><TextField label="Posição" type="number" value={position} onChange={setPosition} /><Button disabled={!selectedGroup || !selectedTeam} onClick={() => qualify.mutate()}>Registrar classificado</Button></div></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{qualified.map((item) => <div key={item.id} className="rounded-md border border-border p-3"><p className="text-xs text-muted-foreground">{groups.find((group) => group.id === item.group_id)?.name ?? "Grupo"}</p><p className="mt-1 font-semibold">{item.qualification_position}º — {teamName(item.team_id)}</p></div>)}</div>{qualified.length === 0 && <EmptyState>Nenhum classificado registrado.</EmptyState>}</Panel>}
 
       {tab === "knockout" && <div className="space-y-4"><Panel title="Fases do mata-mata"><div className="grid gap-3 md:grid-cols-5"><TextField label="Nome" value={stage.name} onChange={(value) => setStage({ ...stage, name: value })} /><TextField label="Tipo" value={stage.stage_type} onChange={(value) => setStage({ ...stage, stage_type: value })} /><TextField label="Ordem" type="number" value={stage.stage_order} onChange={(value) => setStage({ ...stage, stage_order: value })} /><TextField label="Equipes" type="number" value={stage.teams_count} onChange={(value) => setStage({ ...stage, teams_count: value })} /><Button className="mt-auto" disabled={!stage.name.trim()} onClick={() => createStage.mutate()}>Criar fase</Button></div><div className="mt-4 divide-y divide-border">{stages.map((item) => <div key={item.id} className="flex justify-between py-2 text-sm"><span>{item.stage_order}. {item.name}</span><span className="text-muted-foreground">{item.stage_type} · {item.matches_count ?? 0} jogos</span></div>)}</div></Panel><Panel title="Processamento das partidas eliminatórias">{knockoutMatches.length === 0 && <EmptyState>Nenhuma partida de mata-mata encontrada.</EmptyState>}<div className="divide-y divide-border">{knockoutMatches.map((match) => <div key={match.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><span>{shortTeamName(match.home_team_id)} {match.home_score ?? "-"} × {match.away_score ?? "-"} {shortTeamName(match.away_team_id)}</span><Button size="sm" variant="secondary" onClick={() => process.mutate(match.id)}>Processar vencedor</Button></div>)}</div></Panel></div>}
 
@@ -396,7 +473,31 @@ export function KnockoutSection() {
         </div>
       )}
 
-      {tab === "settings" && <Panel title="Configuração da Taça Regional"><div className="grid gap-3 sm:grid-cols-3"><TextField label="Número de equipes" type="number" value={config.team_count} onChange={(value) => setConfig({ ...config, team_count: value })} /><TextField label="Número de grupos" type="number" value={config.group_count} onChange={(value) => setConfig({ ...config, group_count: value })} /><TextField label="Classificados por grupo" type="number" value={config.qualified_per_group} onChange={(value) => setConfig({ ...config, qualified_per_group: value })} /></div><Button className="mt-4" onClick={() => updateConfig.mutate()}>Salvar configuração</Button><p className="mt-3 text-xs text-muted-foreground">As configurações são salvas na temporada selecionada e não alteram outras competições.</p></Panel>}
+      {tab === "settings" && <Panel title="Configuração da Taça Regional">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-md border border-border p-3"><p className="text-xs uppercase tracking-wider text-muted-foreground">Equipes inscritas</p><p className="mt-1 text-2xl font-bold">{registeredTeamCount}</p>{registeredTeamCount === 0 && <p className="mt-1 text-xs text-amber-600">Nenhuma equipe cadastrada para esta Taça.</p>}</div>
+          <TextField label="Número de grupos" type="number" value={config.group_count} onChange={(value) => setConfig({ ...config, group_count: value })} />
+          <div className="rounded-md border border-border p-3"><p className="text-xs uppercase tracking-wider text-muted-foreground">Equipes por grupo</p><p className="mt-1 text-2xl font-bold">{teamsPerGroup ?? "—"}</p></div>
+          <TextField label="Classificados por grupo" type="number" value={config.qualified_per_group} onChange={(value) => setConfig({ ...config, qualified_per_group: value })} />
+        </div>
+        <div className="mt-4 rounded-md border border-border bg-secondary/40 p-4 text-sm">
+          <p>{configuredTeamCount || 0} equipes → {configuredGroupCount || 0} grupos → {configuredQualifiedPerGroup || 0} classificados por grupo → {totalQualified || 0} classificados → <strong>{knockoutLabel}</strong></p>
+          {!groupsAreBalanced && configuredGroupCount > 0 && <p className="mt-2 text-amber-600">Esta configuração não distribui as equipes igualmente entre os grupos. Revise o número de grupos.</p>}
+          {!knockoutIsValid && totalQualified > 0 && <p className="mt-2 text-amber-600">O número de classificados não forma uma chave eliminatória válida. Ajuste o número de grupos ou classificados por grupo.</p>}
+        </div>
+        <Button className="mt-4" onClick={() => updateConfig.mutate()} disabled={!groupsAreBalanced || !knockoutIsValid}>Salvar configuração</Button>
+        <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
+          <p>{registeredTeamCount > 0 ? "✓" : "○"} Equipes cadastradas</p>
+          <p>{groups.length >= configuredGroupCount && configuredGroupCount > 0 ? "✓" : "○"} Grupos criados</p>
+          <p>{groupsAreComplete ? "✓" : "○"} Equipes distribuídas</p>
+          <p>{groupsAreBalanced && knockoutIsValid ? "✓" : "○"} Configuração válida</p>
+          <p>{groupMatches.length > 0 ? "✓" : "○"} Jogos gerados</p>
+          <p>{groupMatches.some((match) => match.homologated) ? "✓" : "○"} Classificação disponível</p>
+          <p>{qualified.length === totalQualified && totalQualified > 0 ? "✓" : "○"} Classificados definidos</p>
+          <p>{knockoutMatches.length > 0 ? "✓" : "○"} Chaveamento gerado</p>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">As configurações são salvas exclusivamente na temporada selecionada e não alteram outras competições.</p>
+      </Panel>}
     </div>
   );
 }

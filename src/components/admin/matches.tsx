@@ -184,6 +184,7 @@ export function RoundsSection() {
 /* ------------------------------------------------------------------ */
 type MatchForm = {
   round: string;
+  group_id?: string;
   home_team_id: string;
   away_team_id: string;
   match_date: string;
@@ -284,13 +285,18 @@ function MatchCreateForm({
   teamOptions,
   onCancel,
   onSubmit,
+  cupMode = false,
+  groupOptions = [],
 }: {
   teamOptions: { value: string; label: string }[];
   onCancel: () => void;
   onSubmit: (f: MatchForm) => void;
+  cupMode?: boolean;
+  groupOptions?: { value: string; label: string }[];
 }) {
   const [f, setF] = useState<MatchForm>({
     round: "1",
+    group_id: "",
     home_team_id: "",
     away_team_id: "",
     match_date: "",
@@ -303,7 +309,8 @@ function MatchCreateForm({
   return (
     <div className="mb-4 rounded-md border border-border p-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <TextField label="Rodada" type="number" value={f.round} onChange={(v) => setF({ ...f, round: v })} />
+        {!cupMode && <TextField label="Rodada" type="number" value={f.round} onChange={(v) => setF({ ...f, round: v })} />}
+        {cupMode && <SelectField label="Grupo" value={f.group_id ?? ""} onChange={(v) => setF({ ...f, group_id: v })} options={groupOptions} placeholder="Selecione" />}
         <SelectField label="Mandante" value={f.home_team_id} onChange={(v) => setF({ ...f, home_team_id: v })} options={teamOptions} placeholder="Selecione" />
         <SelectField label="Visitante" value={f.away_team_id} onChange={(v) => setF({ ...f, away_team_id: v })} options={teamOptions} placeholder="Selecione" />
         <SelectField label="Status" value={f.status} onChange={(v) => setF({ ...f, status: v })} options={MATCH_STATUS_OPTIONS} />
