@@ -13,7 +13,7 @@ const LEAGUE_ITEMS = [
 const CUP_ITEMS = [
   { to: "/", label: "Início", icon: Home },
   { to: "/jogos", label: "Jogos", icon: CalendarDays },
-  { to: "/taca-regional", label: "Grupos", icon: Layers },
+  { to: "/taca-regional", label: "Taça", icon: Layers },
   { to: "/classificacao", label: "Tabela", icon: ListOrdered },
   { to: "/sobre", label: "Menu", icon: Menu },
 ] as const;

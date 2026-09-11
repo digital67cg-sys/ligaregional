@@ -4,14 +4,13 @@ import { useSeason } from "@/context/season";
 import { sortStandings, standingsQuery, teamsQuery } from "@/lib/league";
 import { StandingsTable } from "@/components/site/StandingsTable";
 import { PageHeader } from "@/components/site/PageHeader";
+import { RegionalCup } from "@/components/site/RegionalCup";
 
 export const Route = createFileRoute("/classificacao")({
   head: () => ({
     meta: [
       { title: "Classificação — Liga Regional" },
-      { name: "description", content: "Tabela de classificação atualizada da Liga Regional em pontos corridos." },
-      { property: "og:title", content: "Classificação — Liga Regional" },
-      { property: "og:description", content: "Pontos, jogos, saldo e aproveitamento de todos os clubes." },
+      { name: "description", content: "Classificação pública da competição selecionada." },
     ],
   }),
   component: Classificacao,
@@ -19,9 +18,19 @@ export const Route = createFileRoute("/classificacao")({
 
 function Classificacao() {
   const { season } = useSeason();
+
+  if (season?.competition_type === "grupos_mata_mata") {
+    return <RegionalCup />;
+  }
+
+  return <LeagueStandings />;
+}
+
+function LeagueStandings() {
+  const { season } = useSeason();
   const { data: teams = [] } = useQuery(teamsQuery);
   const { data: rows = [] } = useQuery(standingsQuery(season?.id));
-  const teamMap = new Map(teams.map((t) => [t.id, t]));
+  const teamMap = new Map(teams.map((team) => [team.id, team]));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
@@ -31,8 +40,7 @@ function Classificacao() {
       />
       <StandingsTable rows={sortStandings(rows)} teams={teamMap} />
       <p className="mt-4 text-xs text-muted-foreground">
-        Critérios de desempate: pontos, vitórias, saldo de gols, gols marcados, confronto direto, disciplina e
-        sorteio — configuráveis pela administração da Liga.
+        Critérios de desempate: pontos, vitórias, saldo de gols e gols marcados.
       </p>
     </div>
   );

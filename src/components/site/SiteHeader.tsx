@@ -23,12 +23,15 @@ const LEAGUE_NAV = [
 ] as const;
 
 const CUP_NAV = [
-  { to: "/taca-regional", label: "Taça Regional" },
+  { to: "/", label: "Início" },
   { to: "/jogos", label: "Jogos" },
-  { to: "/classificacao", label: "Grupos" },
+  { to: "/taca-regional", label: "Grupos" },
+  { to: "/classificacao", label: "Classificação" },
+  { to: "/taca-regional", label: "Mata-mata" },
+  { to: "/artilharia", label: "Artilharia" },
   { to: "/ranking", label: "Ranking" },
-  { to: "/noticias", label: "Notícias" },
   { to: "/regulamento", label: "Regulamento" },
+  { to: "/noticias", label: "Notícias" },
   { to: "/contato", label: "Contato" },
 ] as const;
 

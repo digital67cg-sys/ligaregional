@@ -318,13 +318,15 @@ export const playerEventsQuery = (playerId: string) =>
     queryFn: () => rows<MatchEvent>(db.from("match_events").select("*").eq("player_id", playerId)),
   });
 
-export const clubRankingQuery = queryOptions({
-  queryKey: ["club_ranking"],
-  queryFn: () =>
-    rows<{ season_id: string; team_id: string; position: number | null; points: number; achievement: string | null }>(
-      db.from("club_ranking_points").select("*"),
-    ),
-});
+export const clubRankingQuery = (seasonId?: string) =>
+  queryOptions({
+    queryKey: ["club_ranking", seasonId],
+    enabled: !!seasonId,
+    queryFn: () =>
+      rows<{ season_id: string; team_id: string; position: number | null; points: number; achievement: string | null }>(
+        db.from("club_ranking_points").select("*").eq("season_id", seasonId),
+      ),
+  });
 
 export const financeQuery = (seasonId: string | undefined) =>
   queryOptions({
