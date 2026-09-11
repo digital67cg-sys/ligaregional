@@ -37,7 +37,7 @@ export function SiteHeader() {
             <Trophy className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="leading-none">
-            <span className="block text-stadium text-lg">Liga Regional</span>
+            <span className="block text-stadium text-lg">{season?.name || "Liga Regional"}</span>
             <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               {season ? `${season.year} · ${SEASON_STATUS[season.status] ?? season.status}` : "Temporada"}
             </span>
@@ -63,11 +63,11 @@ export function SiteHeader() {
               aria-label="Selecionar temporada"
               value={season?.id ?? ""}
               onChange={(e) => setSeasonId(e.target.value)}
-              className="hidden h-9 rounded-md border border-border bg-surface px-2 text-xs font-semibold uppercase tracking-wide text-foreground sm:block"
+              className="hidden h-9 max-w-[200px] truncate rounded-md border border-border bg-surface px-2 text-xs font-semibold uppercase tracking-wide text-foreground sm:block"
             >
               {seasons.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.year}
+                  {s.name} {s.year}
                 </option>
               ))}
             </select>

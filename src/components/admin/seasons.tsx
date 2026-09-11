@@ -13,6 +13,7 @@ type Form = {
   start_date: string;
   end_date: string;
   status: string;
+  competition_type: string;
   registration_fee: string;
   affiliation_fee: string;
   transfer_window_start: string;
@@ -20,12 +21,18 @@ type Form = {
   notes: string;
 };
 
+const COMPETITION_TYPE_OPTIONS = [
+  { value: "pontos_corridos", label: "Pontos Corridos" },
+  { value: "grupos_mata_mata", label: "Grupos + Mata-Mata" },
+];
+
 const empty: Form = {
   name: "",
   year: String(new Date().getFullYear()),
   start_date: "",
   end_date: "",
   status: "planning",
+  competition_type: "pontos_corridos",
   registration_fee: "0",
   affiliation_fee: "0",
   transfer_window_start: "",
@@ -53,6 +60,7 @@ export function SeasonsSection() {
         start_date: form.start_date || null,
         end_date: form.end_date || null,
         status: form.status,
+        competition_type: form.competition_type,
         registration_fee: Number(form.registration_fee || 0),
         affiliation_fee: Number(form.affiliation_fee || 0),
         transfer_window_start: form.transfer_window_start || null,
@@ -107,7 +115,7 @@ export function SeasonsSection() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const startEdit = (s: Season & { notes?: string | null }) => {
+  const startEdit = (s: Season & { notes?: string | null; competition_type?: string }) => {
     setEditing(s.id);
     setForm({
       name: s.name,
@@ -115,6 +123,7 @@ export function SeasonsSection() {
       start_date: s.start_date ?? "",
       end_date: s.end_date ?? "",
       status: s.status,
+      competition_type: s.competition_type ?? "pontos_corridos",
       registration_fee: String(s.registration_fee ?? 0),
       affiliation_fee: String(s.affiliation_fee ?? 0),
       transfer_window_start: s.transfer_window_start ?? "",
@@ -147,7 +156,7 @@ export function SeasonsSection() {
                   {s.name} {s.is_current && <span className="text-primary">· atual</span>}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {s.year} · {SEASON_STATUS_OPTIONS.find((o) => o.value === s.status)?.label ?? s.status} · Filiação R${" "}
+                  {s.year} · {(s as any).competition_type === 'grupos_mata_mata' ? 'Grupos + Mata-Mata' : 'Pontos Corridos'} · {SEASON_STATUS_OPTIONS.find((o) => o.value === s.status)?.label ?? s.status} · Filiação R${" "}
                   {s.affiliation_fee} · Inscrição R$ {s.registration_fee}
                 </p>
               </div>
@@ -193,6 +202,12 @@ export function SeasonsSection() {
               value={form.status}
               onChange={(v) => setForm({ ...form, status: v })}
               options={SEASON_STATUS_OPTIONS}
+            />
+            <SelectField
+              label="Tipo de competição"
+              value={form.competition_type}
+              onChange={(v) => setForm({ ...form, competition_type: v })}
+              options={COMPETITION_TYPE_OPTIONS}
             />
             <TextField label="Data inicial" type="date" value={form.start_date} onChange={(v) => setForm({ ...form, start_date: v })} />
             <TextField label="Data final" type="date" value={form.end_date} onChange={(v) => setForm({ ...form, end_date: v })} />
