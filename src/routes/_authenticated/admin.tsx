@@ -127,7 +127,7 @@ function PainelAdmin() {
                     type="button"
                     onClick={() => {
                       if (item === "Taça Regional" && (season as any)?.competition_type !== "grupos_mata_mata") {
-                        const target = seasons.find((s) => (s as any).competition_type === "grupos_mata_mata" && s.year === season?.year) || seasons.find((s) => (s as any).competition_type === "grupos_mata_mata");
+                        const target = seasons.find((s) => (s as any).competition_type === "grupos_mata_mata");
                         if (target) setSeasonId(target.id);
                       }
                       setTab(item);
