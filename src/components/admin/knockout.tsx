@@ -187,6 +187,65 @@ export function KnockoutSection() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const generateGroupMatches = useMutation({
+    mutationFn: async () => {
+      if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
+      if (!groups.length) throw new Error("Crie pelo menos um grupo antes de gerar os jogos.");
+      if (!groupTeams.length) throw new Error("Cadastre as equipes nos grupos antes de gerar os jogos.");
+
+      const existingGroupIds = new Set(
+        matches
+          .filter((match) => match.stage === "grupos" && match.group_id)
+          .map((match) => match.group_id as string),
+      );
+      const pendingRows: Record<string, unknown>[] = [];
+      const skippedGroups: string[] = [];
+
+      for (const group of groups) {
+        if (existingGroupIds.has(group.id)) {
+          skippedGroups.push(group.name);
+          continue;
+        }
+
+        const members = groupTeams.filter((item) => item.group_id === group.id);
+        let round = 1;
+        for (let index = 0; index < members.length; index += 1) {
+          for (let opponent = index + 1; opponent < members.length; opponent += 1) {
+            pendingRows.push({
+              season_id: season.id,
+              group_id: group.id,
+              stage: "grupos",
+              round,
+              leg: 1,
+              home_team_id: members[index].team_id,
+              away_team_id: members[opponent].team_id,
+              status: "to_define",
+            });
+            round += 1;
+          }
+        }
+      }
+
+      if (pendingRows.length) {
+        const { error } = await db.from("matches").insert(pendingRows);
+        if (error) throw error;
+      }
+
+      return { created: pendingRows.length, skippedGroups };
+    },
+    onSuccess: ({ created, skippedGroups }) => {
+      refresh();
+      if (created === 0 && skippedGroups.length) {
+        toast.info("Os jogos destes grupos já foram gerados.");
+      } else if (skippedGroups.length) {
+        toast.success(`${created} jogos gerados. Grupos já existentes: ${skippedGroups.join(", ")}.`);
+      } else {
+        toast.success(`${created} jogos da fase de grupos gerados.`);
+      }
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const updateConfig = useMutation({
     mutationFn: async () => {
       if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
@@ -265,7 +324,22 @@ export function KnockoutSection() {
 
       {tab === "groups" && (
         <div className="space-y-4">
-          <Panel title="Gerenciar grupos">
+          <Panel
+            title="Gerenciar grupos"
+            action={
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (window.confirm("Os jogos serão gerados com base nas equipes atualmente cadastradas nos grupos. Deseja continuar?")) {
+                    generateGroupMatches.mutate();
+                  }
+                }}
+                disabled={generateGroupMatches.isPending || !groups.length}
+              >
+                {generateGroupMatches.isPending ? "Gerando..." : "Gerar jogos da fase de grupos"}
+              </Button>
+            }
+          >
             <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
               <TextField label="Nome do novo grupo" value={groupName} onChange={setGroupName} placeholder="Grupo A" />
               <Button className="mt-auto" disabled={!groupName.trim()} onClick={() => createGroup.mutate()}>Criar grupo</Button>
@@ -297,13 +371,28 @@ export function KnockoutSection() {
 
       {tab === "matches" && (
         <div className="space-y-3">
-          <Panel title="Jogos da Taça Regional">
+          <Panel
+            title="Jogos da Taça Regional"
+            action={
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (window.confirm("Os jogos serão gerados com base nas equipes atualmente cadastradas nos grupos. Deseja continuar?")) {
+                    generateGroupMatches.mutate();
+                  }
+                }}
+                disabled={generateGroupMatches.isPending || !groups.length}
+              >
+                {generateGroupMatches.isPending ? "Gerando..." : "Gerar jogos da fase de grupos"}
+              </Button>
+            }
+          >
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>A listagem abaixo utiliza exclusivamente a temporada selecionada: {season.name}.</p>
-              <p>Partidas homologadas atualizam os dados da competição; partidas eliminatórias acionam automaticamente o processamento oficial do mata-mata.</p>
+              <p>Os jogos da fase de grupos são vinculados ao grupo e não utilizam rodadas como referência esportiva.</p>
             </div>
           </Panel>
-          <MatchesSection />
+          <MatchesSection cupMode />
         </div>
       )}
 

@@ -194,11 +194,12 @@ type MatchForm = {
   notes: string;
 };
 
-export function MatchesSection({ onlyPending = false }: { onlyPending?: boolean }) {
+export function MatchesSection({ onlyPending = false, cupMode = false }: { onlyPending?: boolean; cupMode?: boolean }) {
   const { season } = useSeason();
   const refresh = useRefresh();
   const { data: matches = [] } = useQuery(matchesQuery(season?.id));
   const { data: teams = [] } = useQuery(teamsQuery);
+  const { data: groups = [] } = useQuery(competitionGroupsQuery(season?.id));
   const [creating, setCreating] = useState(false);
   const [roundFilter, setRoundFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
@@ -207,6 +208,7 @@ export function MatchesSection({ onlyPending = false }: { onlyPending?: boolean 
 
   const teamOptions = teams.map((t) => ({ value: t.id, label: t.name }));
   const rounds = [...new Set(matches.map((m) => m.round))].sort((a, b) => a - b);
+  const groupName = (id: string | null | undefined) => groups.find((group) => group.id === id)?.name ?? "Grupo a definir";
 
   const create = useMutation({
     mutationFn: async (f: MatchForm) => {
@@ -224,6 +226,7 @@ export function MatchesSection({ onlyPending = false }: { onlyPending?: boolean 
           address: f.address || null,
           status: f.status,
           notes: f.notes || null,
+          ...(cupMode ? { stage: "grupos", group_id: f.group_id || null } : {}),
         })
         .select("id")
         .single();
@@ -241,45 +244,37 @@ export function MatchesSection({ onlyPending = false }: { onlyPending?: boolean 
   const filtered = matches.filter(
     (m) =>
       (!onlyPending || !m.homologated) &&
+      (!cupMode || m.stage !== "mata_mata") &&
       (!roundFilter || String(m.round) === roundFilter) &&
       (!teamFilter || m.home_team_id === teamFilter || m.away_team_id === teamFilter) &&
       (!statusFilter || m.status === statusFilter),
   );
+  const grouped = groups.map((group) => ({ group, matches: filtered.filter((match) => match.group_id === group.id) })).filter((item) => item.matches.length);
+
+  const renderRows = (list: typeof filtered) => (
+    <div className="divide-y divide-border">
+      {list.map((m) => (
+        <MatchRow key={m.id} match={m} teams={teams} open={openId === m.id} cupMode={cupMode} onToggle={() => setOpenId(openId === m.id ? null : m.id)} />
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-4">
-      <Panel
-        title={`Partidas (${filtered.length})`}
-        action={
-          <Button size="sm" onClick={() => setCreating((v) => !v)}>
-            + Nova partida
-          </Button>
-        }
-      >
-        {creating && <MatchCreateForm teamOptions={teamOptions} onCancel={() => setCreating(false)} onSubmit={(f) => create.mutate(f)} />}
+      <Panel title={`${cupMode ? "Jogos da fase de grupos" : "Partidas"} (${filtered.length})`} action={<Button size="sm" onClick={() => setCreating((v) => !v)}>+ Nova partida</Button>}>
+        {creating && <MatchCreateForm teamOptions={teamOptions} onCancel={() => setCreating(false)} onSubmit={(f) => create.mutate(f)} cupMode={cupMode} groupOptions={groups.map((group) => ({ value: group.id, label: group.name }))} />}
         <div className="mb-3 grid gap-2 sm:grid-cols-3">
-          <SelectField
-            label="Rodada"
-            value={roundFilter}
-            onChange={setRoundFilter}
-            options={rounds.map((r) => ({ value: String(r), label: `Rodada ${r}` }))}
-            placeholder="Todas"
-          />
+          {!cupMode && <SelectField label="Rodada" value={roundFilter} onChange={setRoundFilter} options={rounds.map((r) => ({ value: String(r), label: `Rodada ${r}` }))} placeholder="Todas" />}
           <SelectField label="Clube" value={teamFilter} onChange={setTeamFilter} options={teamOptions} placeholder="Todos" />
           <SelectField label="Status" value={statusFilter} onChange={setStatusFilter} options={MATCH_STATUS_OPTIONS} placeholder="Todos" />
         </div>
         {filtered.length === 0 && <EmptyState>Nenhuma partida encontrada.</EmptyState>}
-        <div className="divide-y divide-border">
-          {filtered.map((m) => (
-            <MatchRow
-              key={m.id}
-              match={m}
-              teams={teams}
-              open={openId === m.id}
-              onToggle={() => setOpenId(openId === m.id ? null : m.id)}
-            />
-          ))}
-        </div>
+        {cupMode ? (
+          <div className="space-y-5">
+            {grouped.map(({ group, matches: groupMatches }) => <section key={group.id}><h3 className="mb-2 font-display text-lg font-bold uppercase text-primary">{group.name}</h3>{renderRows(groupMatches)}</section>)}
+            {filtered.some((match) => !match.group_id) && <section><h3 className="mb-2 font-display text-lg font-bold uppercase text-primary">Grupo a definir</h3>{renderRows(filtered.filter((match) => !match.group_id))}</section>}
+          </div>
+        ) : renderRows(filtered)}
       </Panel>
     </div>
   );
