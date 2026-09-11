@@ -330,12 +330,28 @@ export function KnockoutSection() {
   const generateKnockout = useMutation({
     mutationFn: async () => {
       if (!season?.id) throw new Error("Nenhuma temporada selecionada.");
-      if (!knockoutIsValid) throw new Error("O número de classificados não forma uma chave eliminatória válida.");
-      if (qualified.length !== totalQualified) throw new Error("Defina os classificados antes de gerar o mata-mata.");
+      if (season.competition_type !== "grupos_mata_mata") throw new Error("A temporada selecionada não está configurada como grupos_mata_mata.");
+      if (!groups.length) throw new Error("Cadastre os grupos antes de gerar o mata-mata.");
+      if (!knockoutIsValid) throw new Error("O número de classificados deve ser 2, 4, 8 ou 16.");
+      if (!groupsAreComplete) throw new Error("Distribua todas as equipes nos grupos antes de gerar o mata-mata.");
+      if (groupMatches.length === 0 || groupMatches.some((match) => !match.homologated)) {
+        throw new Error("Finalize e homologue os jogos da fase de grupos para definir os classificados.");
+      }
+      if (knockoutMatches.length > 0) {
+        throw new Error("Mata-mata já gerado para esta competição.");
+      }
+
+      if (qualified.length !== totalQualified) {
+        await callRpc("populate_competition_qualified_teams", { p_season_id: season.id });
+      }
+
       await callRpc("generate_competition_knockout_bracket", { p_season_id: season.id });
       return callRpc("create_competition_knockout_matches", { p_season_id: season.id });
     },
-    onSuccess: () => { refresh(); toast.success("Chaveamento e partidas do mata-mata gerados."); },
+    onSuccess: () => {
+      refresh();
+      toast.success("Chaveamento e partidas do mata-mata gerados.");
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -448,9 +464,8 @@ export function KnockoutSection() {
 
       {tab === "matches" && (
         <div className="space-y-3">
-          <Panel
-            title="Jogos da Taça Regional"
-            action={
+          <Panel title="Jogos da Taça Regional">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Button
                 size="sm"
                 onClick={() => {
@@ -462,11 +477,34 @@ export function KnockoutSection() {
               >
                 {generateGroupMatches.isPending ? "Gerando..." : "Gerar jogos da fase de grupos"}
               </Button>
-            }
-          >
-            <div className="space-y-2 text-sm text-muted-foreground">
+              <Button
+                size="sm"
+                variant={knockoutMatches.length > 0 ? "secondary" : "default"}
+                onClick={() => {
+                  if (knockoutMatches.length > 0) {
+                    toast.info("Mata-mata já gerado para esta competição. Visualize a chave abaixo.");
+                    return;
+                  }
+                  generateKnockout.mutate();
+                }}
+                disabled={generateKnockout.isPending || knockoutMatches.length > 0 || !groups.length || !knockoutIsValid || !groupsAreComplete || groupMatches.length === 0 || groupMatches.some((match) => !match.homologated)}
+              >
+                {generateKnockout.isPending ? "Gerando..." : knockoutMatches.length > 0 ? "Mata-mata já gerado" : "Gerar jogos do Mata-Mata"}
+              </Button>
+            </div>
+            <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+              <p className="rounded-md border border-border p-3">FASE DE GRUPOS {groupMatches.length > 0 ? "✓ Jogos gerados" : "○ Pendente"}</p>
+              <p className="rounded-md border border-border p-3">CLASSIFICAÇÃO {groupMatches.some((match) => match.homologated) ? "✓ Atualizada" : "○ Pendente"}</p>
+              <p className="rounded-md border border-border p-3">CLASSIFICADOS {qualified.length > 0 ? `✓ ${qualified.length} classificados` : "○ Pendente"}</p>
+              <p className="rounded-md border border-border p-3">MATA-MATA {knockoutMatches.length > 0 ? "✓ Chaveamento gerado" : "○ Pendente"}</p>
+            </div>
+            {groupMatches.length > 0 && groupMatches.every((match) => match.homologated) && qualified.length === 0 && (
+              <p className="mt-3 text-sm text-amber-600">Mata-mata ainda não pode ser gerado. Finalize e homologue os jogos da fase de grupos para definir os classificados.</p>
+            )}
+            {knockoutMatches.length > 0 && <p className="mt-3 text-sm text-muted-foreground">Mata-mata já gerado para esta competição. Visualize a chave na seção MATA-MATA abaixo.</p>}
+            <div className="mt-3 space-y-2 text-sm text-muted-foreground">
               <p>A listagem abaixo utiliza exclusivamente a temporada selecionada: {season.name}.</p>
-              <p>Os jogos da fase de grupos são vinculados ao grupo e não utilizam rodadas como referência esportiva.</p>
+              <p>As partidas eliminatórias são criadas pelas funções oficiais do mata-mata e reutilizam o mesmo fluxo de edição, súmula e homologação.</p>
             </div>
           </Panel>
           <MatchesSection cupMode />
