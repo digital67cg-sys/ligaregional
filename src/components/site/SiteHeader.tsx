@@ -37,7 +37,7 @@ export function SiteHeader() {
             <Trophy className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="leading-none">
-            <span className="block text-stadium text-lg uppercase">{season?.name || "LIGA REGIONAL"}</span>
+            <span className="block text-stadium text-lg uppercase">LIGA REGIONAL</span>
             <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               {season ? `${season.year} • ${SEASON_STATUS[season.status] ?? season.status}` : "TEMPORADA"}
             </span>
@@ -67,7 +67,7 @@ export function SiteHeader() {
             >
               {seasons.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} {s.year}
+                  {String(s.name).includes(String(s.year || "")) ? s.name : `${s.name} ${s.year}`}
                 </option>
               ))}
             </select>
